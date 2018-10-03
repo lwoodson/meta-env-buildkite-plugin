@@ -1,0 +1,50 @@
+#!/bin/bash
+set -euo pipefail
+
+meta_env_file="${BUILDKITE_BUILD_CHECKOUT_PATH}/.meta-env"
+
+# remove any old .meta-env files
+rm -f "${meta_env_file}"
+
+# make sure there is a new, empty .meta-env file that can be sourced to
+# no effect
+touch "${meta_env_file}"
+
+echo "Looking for meta-data to propagate to env vars..."
+# lets loop through all of our plugin's mapping elements
+for i in $(seq 0 5); do
+  mapping_element="BUILDKITE_PLUGIN_META_ENV_META_DATA_${i}"
+
+  # break if we have no more mapping elements
+  if [ -z $(env | egrep "^${mapping_element}=") ]; then
+    break
+  fi
+
+  meta_data_name=$(eval "echo \$$(echo $mapping_element)")
+
+  # if we already have an environment variable for a mapping
+  # specification, lets die rather than overwrite
+  if [ ! -z $(env | egrep "^$meta_data_name=") ]; then
+    echo "!!! ERROR: ${meta_data_name} environment variable already set!"
+    cat /dev/null > "${meta_env_file}"
+    exit 1
+  fi
+
+  #meta_data_value=TODO
+  meta_data_value=$(buildkite-agent meta-data get "${meta_data_name}")
+
+  # if we find no value for the meta-data, lets fail fast.
+  # should this be a configurable option?
+  if [ -z "${meta_data_value}" ]; then
+    echo "!!! ERROR: no meta-data found for ${meta_data_name}"
+    cat /dev/null > "${meta_env_file}"
+    exit 2
+  fi
+
+  # append an export of the meta-data name to value as an environment variable
+  # to our sourceable .meta-env file
+  echo "export ${meta_data_name}=${meta_data_value}" >> "${meta_env_file}"
+  echo "Propagating meta-data ${meta_data_name} to env var"
+done
+
+echo "Done."

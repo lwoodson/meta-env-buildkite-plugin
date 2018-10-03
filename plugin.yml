@@ -1,0 +1,17 @@
+name: Meta Env
+descrtiption: >
+  Allows propagation of metadata fetched with 'buildkite-agent meta-data get
+  <name>' to environment variables for easy access without having to rely on
+  `buildkite-agent` in your build scripts
+author: https://github.com/lwoodson
+requirements:
+  - buildkite-agent
+configuration:
+  properties:
+    meta-data:
+      type: [ string, array ]
+      minimum: 1
+  required:
+    - meta-data
+  additionalProperties: false
+
