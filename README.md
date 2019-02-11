@@ -21,7 +21,7 @@ The basic steps for usage are:
    environment variables w/propagated meta-data.
 
 Example:
-```
+```yml
 steps:
   # collect the TARGET_ENVIRONMENT, LAMBDA_NAME and DEPLOY_VERSION
   # meta-data with a block step
@@ -48,13 +48,13 @@ steps:
   - command: source .meta-env && deploy $TARGET_ENVIRONMENT $LAMBDA_NAME $DEPLOY_VERSION
     label: ":rocket: do deployment"
     plugins:
-      shippingeasy/meta-env#v0.1.2:
-        meta-data:
-          - TARGET_ENVIRONMENT
-          - LAMBDA_NAME
-          - DEPLOY_VERSION
-      docker-compose#v2.5.1:
-        run: deploy-env
+      - shippingeasy/meta-env#v0.1.2:
+          meta-data:
+            - TARGET_ENVIRONMENT
+            - LAMBDA_NAME
+            - DEPLOY_VERSION
+      - docker-compose#v2.5.1:
+          run: deploy-env
 ```
 
 The following happens with the above pipeline:
